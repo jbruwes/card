@@ -8,7 +8,7 @@
     "name": "sucrase"
   },
   "index.html": {
-    "file": "assets/index-Bi-7Nky4.js",
+    "file": "assets/index-By42K9ES.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -26,7 +26,7 @@
     ]
   },
   "src/views/NotFoundView.vue": {
-    "file": "assets/NotFoundView-BtIQ2d-Z.js",
+    "file": "assets/NotFoundView-DoFzS0UT.js",
     "name": "NotFoundView",
     "src": "src/views/NotFoundView.vue",
     "isDynamicEntry": true,
@@ -37,7 +37,7 @@
     ]
   },
   "src/views/PageView.vue": {
-    "file": "assets/PageView-Kv_txTJw.js",
+    "file": "assets/PageView-BybG-Vri.js",
     "name": "PageView",
     "src": "src/views/PageView.vue",
     "isDynamicEntry": true,
@@ -48,7 +48,7 @@
     ]
   },
   "src/views/RootView.vue": {
-    "file": "assets/RootView-CJU0xGIe.js",
+    "file": "assets/RootView-CykTR4ys.js",
     "name": "RootView",
     "src": "src/views/RootView.vue",
     "isDynamicEntry": true,
