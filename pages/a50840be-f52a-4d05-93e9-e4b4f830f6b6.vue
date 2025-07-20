@@ -13,7 +13,7 @@
       </TresShaderMaterial>
     </TresMesh>
   </Levioso>
-  <TresEffectComposer ref="composerRef" :args="[renderer]" :set-size="[sizes.width.value, sizes.height.value]"
+  <TresEffectComposer ref="composerRef" :args="[renderer]" 
     :renderToScreen="false">
     <TresRenderPass :args="[sceneRTT, cameraRTT]" attach="passes-0" />
     <TresUnrealBloomPass :args="[undefined, 0.5, 2.29, 0]" attach="passes-1" />
