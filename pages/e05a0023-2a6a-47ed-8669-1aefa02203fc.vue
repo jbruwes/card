@@ -1,6 +1,6 @@
 <template>
     <TresPerspectiveCamera :position="[0, 0, 50]"></TresPerspectiveCamera>
-    <!--OrbitControls></OrbitControls-->
+    <OrbitControls></OrbitControls>
 </template>
 
 <script setup lang="js">

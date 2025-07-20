@@ -13,7 +13,7 @@
       </TresShaderMaterial>
     </TresMesh>
   </Levioso>
-  <TresEffectComposer ref="composerRef" :args="[renderer]" 
+  <TresEffectComposer ref="composerRef" :args="[renderer]" :set-size="[sizes.width.value, sizes.height.value]"
     :renderToScreen="false">
     <TresRenderPass :args="[sceneRTT, cameraRTT]" attach="passes-0" />
     <TresUnrealBloomPass :args="[undefined, 0.5, 2.29, 0]" attach="passes-1" />
@@ -74,6 +74,28 @@ const { width, height } = useWindowSize(),
   mesh2 = await useLoader(OBJLoader, "./models/skull5.obj");
 
 onMounted(() => {
+  sceneRTT.background = new Color(0x000000);
+  cameraRTT.position.set(0, -3, 20);
+  eye.position.set(-2.2, -2.2, -6.6);
+  eye2.position.set(2.2, -2.2, -6.6);
+  modelgroup.add(eye);
+  modelgroup.add(eye2);
+  mesh2.position.set(0, 0, -10);
+  mesh2.rotation.set(Math.PI, 0, Math.PI);
+  mesh2.children.forEach((val) => {
+    val.traverse(function (child) {
+      child.geometry = mergeVertices(child.geometry);
+      child.material = skullmaterial;
+      child.verticesNeedUpdate = true;
+      child.normalsNeedUpdate = true;
+      child.uvsNeedUpdate = true;
+      child.geometry.computeVertexNormals();
+    });
+  });
+  mesh2.scale.set(8, 8, 8);
+  modelgroup.add(mesh2);
+  sceneRTT.add(modelgroup);
+
   frontuniforms.skullrender = { type: "t", value: composer.value.readBuffer.texture };
 });
 
@@ -85,31 +107,10 @@ onBeforeRender(({ clock: { oldTime } }) => {
 });
 
 watch([width, height], ([newWidth, newHeight]) => {
-  console.log(cameraRTT);
-//  cameraRTT.aspect = sizes.width.value / sizes.height.value;
-//  cameraRTT.updateProjectionMatrix();
-//  cameraRTT.position.set(0, -3, 20);
+  console.log(sceneRTT);
+  //  cameraRTT.aspect = sizes.width.value / sizes.height.value;
+  //  cameraRTT.updateProjectionMatrix();
+  //  cameraRTT.position.set(0, -3, 20);
 });
 
-sceneRTT.background = new Color(0x000000);
-cameraRTT.position.set(0, -3, 20);
-eye.position.set(-2.2, -2.2, -6.6);
-eye2.position.set(2.2, -2.2, -6.6);
-modelgroup.add(eye);
-modelgroup.add(eye2);
-mesh2.position.set(0, 0, -10);
-mesh2.rotation.set(Math.PI, 0, Math.PI);
-mesh2.children.forEach((val) => {
-  val.traverse(function (child) {
-    child.geometry = mergeVertices(child.geometry);
-    child.material = skullmaterial;
-    child.verticesNeedUpdate = true;
-    child.normalsNeedUpdate = true;
-    child.uvsNeedUpdate = true;
-    child.geometry.computeVertexNormals();
-  });
-});
-mesh2.scale.set(8, 8, 8);
-modelgroup.add(mesh2);
-sceneRTT.add(modelgroup);
 </script>
