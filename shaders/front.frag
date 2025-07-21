@@ -17,7 +17,7 @@ float Fresnel(vec3 eyeVector, vec3 worldNormal) {
 void main() {
     vec2 uv = gl_FragCoord.xy/resolution.xy ;
     vec4 temptex = texture2D( cardtemplate, vUv);
-    vec4 skulltex = texture2D( skullrender, uv - 0.5 );
+    vec4 skulltex = texture2D( skullrender, vUv );
     gl_FragColor = temptex;
     float f = Fresnel(eyeVector, vNormal);
     vec4 noisetex = texture2D( noise, mod(vUv*2.,1.));
