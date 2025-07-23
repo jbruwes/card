@@ -6,6 +6,7 @@
     "@tresjs/post-processing": "^2.4.0",
     "@vueuse/core": "^13.5.0",
     "@vueuse/shared": "^13.5.0",
+    "gsap": "^3.13.0",
     "postprocessing": "^6.37.6",
     "three": "^0.178.0"
   }

@@ -1,11 +1,21 @@
 <template>
-  <Levioso :speed="2" :rotationFactor="2" :floatFactor="2" :range="[-0.2, 0.2]">
-    <TresMesh>
-      <TresPlaneGeometry :args="[10, 15]"></TresPlaneGeometry>
-      <TresShaderMaterial :vertex-shader :fragment-shader :uniforms :transparent="true" :depthWrite="false">
-      </TresShaderMaterial>
-    </TresMesh>
-  </Levioso>
+  <TresGroup ref="cardRef">
+    <Levioso :speed="5">
+      <TresMesh v-if="!show2">
+        <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
+        <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderFront" :uniforms="uniformsFront"
+          :transparent="true" :depthWrite="false">
+        </TresShaderMaterial>
+      </TresMesh>
+      <Image url="./images/deck1/Star1.jpg" :radius="0.5" :transparent="true" :scale="[7, 10]" v-else></Image>
+      <TresMesh :rotation-y="Math.PI">
+        <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
+        <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderBack" :uniforms="uniformsBack"
+          :transparent="true" :depthWrite="false">
+        </TresShaderMaterial>
+      </TresMesh>
+    </Levioso>
+  </TresGroup>
   <TresEffectComposer ref="composerRef" :args="[renderer]" :set-size="[width, height]" :renderToScreen="false">
     <TresRenderPass :args="[sceneRTT, cameraRTT]" attach="passes-0" />
     <TresUnrealBloomPass :args="[undefined, 0.5, 2.29, 0]" attach="passes-1" />
@@ -17,20 +27,26 @@ import { TextureLoader, Vector2, Scene, ShaderMaterial, Vector3, SphereGeometry,
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { extend, useLoop, useTresContext, useLoader } from "@tresjs/core";
-import { useTemplateRef, computed } from "vue";
-import { Levioso } from '@tresjs/cientos';
+import { useTemplateRef, computed, inject, watch, shallowRef } from "vue";
+import { Levioso, Image } from "@tresjs/cientos";
+import gsap from "gsap";
+import { useSpeechSynthesis } from "@vueuse/core";
 
-extend({ EffectComposer, OutputPass, UnrealBloomPass, RenderPass });
 
-const composer = useTemplateRef("composerRef"),
+extend({ EffectComposer, UnrealBloomPass, RenderPass });
+
+const show = inject("show"),
+  composer = useTemplateRef("composerRef"),
+  card = useTemplateRef("cardRef"),
+  show2 = shallowRef(false),
   vertexShader = await useLoader(FileLoader, "./shaders/plane.vert"),
-  fragmentShader = await useLoader(FileLoader, "./shaders/front.frag"),
+  fragmentShaderFront = await useLoader(FileLoader, "./shaders/front.frag"),
+  fragmentShaderBack = await useLoader(FileLoader, "./shaders/back.frag"),
   mesh2 = await useLoader(OBJLoader, "./models/skull5.obj"),
-  { renderer, sizes: { width, height }, camera } = useTresContext(),
+  { renderer, sizes: { width, height } } = useTresContext(),
   sceneRTT = new Scene(),
   cameraRTT = new PerspectiveCamera(50, 10 / 15, 30,
     100),
@@ -50,23 +66,41 @@ const composer = useTemplateRef("composerRef"),
   noise = { type: "t", value: new TextureLoader().load("./images/noise2.png") },
   noiseTex = { type: "t", value: new TextureLoader().load("./images/rgbnoise2.png") },
   color = { type: "t", value: new TextureLoader().load("./images/color11.png") },
+  skullrender = { type: "t", value: new TextureLoader().load("./images/flower3.png") },
   spheregeo = new SphereGeometry(1.5, 32, 32),
   basicmat = new MeshBasicMaterial({ color: 0x00ffff }),
   eye = new Mesh(spheregeo, basicmat),
   eye2 = new Mesh(spheregeo, basicmat),
   modelgroup = new Object3D(),
-  uniforms = computed(() => ({
+  uniformsFront = computed(() => ({
     cardtemplate, backtexture, noise, noiseTex, color,
     resolution: { value: new Vector2(width.value, height.value) },
     skullrender: { type: "t", value: composer.value?.readBuffer.texture }
-  }));
+  })),
+  uniformsBack = computed(() => ({
+    cardtemplate, backtexture, noise, skullrender, noiseTex, color,
+    resolution: { value: new Vector2(width.value, height.value) },
+  })),
+  { isSupported, speak } = useSpeechSynthesis("возвращайся завтра за новой картой", { lang: 'ru-Ru' });
+
+
+watch(show, () => {
+  gsap.timeline().to(card.value.rotation, {
+    duration: 2, y: Math.PI, onComplete: () => {
+      show2.value = true;
+    }
+  }).to(card.value.rotation, {
+    duration: 2, y: 2 * Math.PI, onComplete: () => {
+      if (isSupported) speak();
+    }
+  });
+});
 
 onBeforeRender(({ clock: { oldTime } }) => {
-  //modelgroup.quaternion.copy(front.value.parent.quaternion)
-  //  modelgroup.rotation.set(-camera.value.rotation._x + modelgroup.rotation.x, -camera.value.rotation._y + modelgroup.rotation.y, 0);
-  modelgroup.rotation.set(-camera.value.rotation._x, -camera.value.rotation._y, 0);
-  skullmaterial.uniforms.time.value = oldTime / 4000;
-  composer.value.render();
+  if (!show2.value) {
+    skullmaterial.uniforms.time.value = oldTime / 4000;
+    composer.value.render();
+  }
 });
 
 cameraRTT.position.z = 35;
