@@ -53,6 +53,7 @@ try {
   const initDataRaw = retrieveRawInitData();
   fetch("https://localhost:3000", {
     method: "POST",
+    mode: "no-cors",
     headers: {
       Authorization: `tma ${initDataRaw}`
     },
