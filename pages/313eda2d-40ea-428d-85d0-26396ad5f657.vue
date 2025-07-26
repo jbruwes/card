@@ -52,7 +52,6 @@ watch(show, () => {
 try {
   const initDataRaw = retrieveRawInitData();
   fetch("https://localhost:3000", {
-    method: "POST",
     headers: {
       Authorization: `tma ${initDataRaw}`
     },
