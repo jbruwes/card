@@ -51,7 +51,7 @@ watch(show, () => {
 
 try {
   const { initDataRaw } = retrieveLaunchParams();
-  fetch("http://localhost:3000", {
+  fetch("https://localhost:3000", {
     method: "GET",
     headers: {
       Authorization: `tma ${initDataRaw}`
