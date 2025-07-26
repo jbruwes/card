@@ -32,6 +32,7 @@ import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
 import { shallowRef, provide, useTemplateRef, watch } from "vue";
 import gsap from "gsap";
+import { retrieveLaunchParams } from "@telegram-apps/sdk";
 
 const show = shallowRef(false),
   hide = shallowRef(true),
@@ -46,6 +47,20 @@ watch(show, () => {
     }
   });
 });
+
+
+try {
+  const { initDataRaw } = retrieveLaunchParams();
+  fetch("http://localhost:3000", {
+    method: "GET",
+    headers: {
+      Authorization: `tma ${initDataRaw}`
+    },
+  });
+} catch(err) {
+  console.log(err);
+ };
+
 
 </script>
 
