@@ -53,6 +53,7 @@ watch(() => show[2], () => {
   if (isSupported) speak();
 });
 
+/*
 if (await isTMA()) {
   const initDataRaw = retrieveRawInitData();
   fetch("https://localhost:3000", {
@@ -61,10 +62,11 @@ if (await isTMA()) {
     },
   });
 } else {
+*/
   cardNumber.value = parseInt(get("card"));
   if (isNaN(cardNumber.value)) cardNumber.value = Math.floor(Math.random() * 100) + 1;
   else show.fill(true);
-}
+//}
 
 watch(() => show[0], () => {
   const now = new Date();
