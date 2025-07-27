@@ -1,13 +1,13 @@
 <template>
   <TresGroup ref="cardRef">
     <Levioso :speed="5">
-      <TresMesh v-if="!show2">
+      <TresMesh v-if="!show[1]">
         <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
         <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderFront" :uniforms="uniformsFront"
           :transparent="true" :depthWrite="false">
         </TresShaderMaterial>
       </TresMesh>
-      <Image url="./images/deck1/Star1.jpg" :radius="0.5" :transparent="true" :scale="[7, 10]" v-else></Image>
+      <Image :url="`./images/deck1/Star${cardNumber}.jpg`" :radius="0.5" :transparent="true" :scale="[7, 10]" v-else></Image>
       <TresMesh :rotation-y="Math.PI">
         <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
         <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderBack" :uniforms="uniformsBack"
@@ -30,18 +30,16 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { extend, useLoop, useTresContext, useLoader } from "@tresjs/core";
-import { useTemplateRef, computed, inject, watch, shallowRef } from "vue";
+import { useTemplateRef, computed, inject, watch } from "vue";
 import { Levioso, Image } from "@tresjs/cientos";
 import gsap from "gsap";
-import { useSpeechSynthesis } from "@vueuse/core";
-
 
 extend({ EffectComposer, UnrealBloomPass, RenderPass });
 
 const show = inject("show"),
+  cardNumber = inject("cardNumber"),
   composer = useTemplateRef("composerRef"),
   card = useTemplateRef("cardRef"),
-  show2 = shallowRef(false),
   vertexShader = await useLoader(FileLoader, "./shaders/plane.vert"),
   fragmentShaderFront = await useLoader(FileLoader, "./shaders/front.frag"),
   fragmentShaderBack = await useLoader(FileLoader, "./shaders/back.frag"),
@@ -80,24 +78,19 @@ const show = inject("show"),
   uniformsBack = computed(() => ({
     cardtemplate, backtexture, noise, skullrender, noiseTex, color,
     resolution: { value: new Vector2(width.value, height.value) },
-  })),
-  { isSupported, speak } = useSpeechSynthesis("возвращайся завтра за новой картой", { lang: 'ru-Ru' });
+  }));
 
 
-watch(show, () => {
+watch(() => show[0], () => {
   gsap.timeline().to(card.value.rotation, {
     duration: 2, y: Math.PI, onComplete: () => {
-      show2.value = true;
+      show[1] = true;
     }
-  }).to(card.value.rotation, {
-    duration: 2, y: 2 * Math.PI, onComplete: () => {
-      if (isSupported) speak();
-    }
-  });
+  }).to(card.value.rotation, { duration: 2, y: 2 * Math.PI });
 });
 
 onBeforeRender(({ clock: { oldTime } }) => {
-  if (!show2.value) {
+  if (!show[1]) {
     skullmaterial.uniforms.time.value = oldTime / 4000;
     composer.value.render();
   }

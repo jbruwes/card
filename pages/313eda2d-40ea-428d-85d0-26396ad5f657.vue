@@ -1,6 +1,6 @@
 <template>
 
-  <div class="inset-0 fixed bg-linear-to-r from-cyan-500 to-blue-500" v-show="show">
+  <div class="inset-0 fixed bg-linear-to-r from-cyan-500 to-blue-500">
     <ul class="absolute inset-0 overflow-hidden">
       <li v-for="i in 10" class="absolute bg-white/20 -bottom-48 animate-[animate_25s_linear_infinite] rounded-full"
         :class="`circle${i}`"></li>
@@ -8,62 +8,80 @@
   </div>
 
   <div class="fixed inset-0 bg-radial-[125%_125%_at_50%_10%] from-black from-40% to-fuchsia-700" ref="backRef"
-    v-if="hide"></div>
+    v-if="!show[2]"></div>
 
   <TresCanvas window-size>
     <TresPerspectiveCamera :position="[0, 0, 20]"></TresPerspectiveCamera>
     <router-view></router-view>
     <EffectComposer>
       <SMAA></SMAA>
-      <Glitch :goWild="true" v-if="!show"></Glitch>
+      <Glitch :goWild="true" v-if="!show[0]"></Glitch>
     </EffectComposer>
   </TresCanvas>
-
-  <div class="fixed left-0 right-0 bottom-0" v-if="!show">
-    <div class="w-fit mx-auto mb-12"><button @click="show = true"
-        className="cursor-pointer py-3 rounded-full border-2 bg-black px-6 text-xs hover:bg-white hover:text-black font-medium text-white">НАЖМИ
-        И УЗРИ СВОЮ КАРТУ ДНЯ</button>
+  <Transition name="custom-classes" enter-active-class="animate__animated animate__tada"
+    leave-active-class="animate__animated animate__bounceOutRight">
+    <div class="fixed left-0 right-0 bottom-0" v-show="!show[0]">
+      <div class="w-fit mx-auto mb-12"><el-button size="large" color="DarkMagenta" round dark
+          @click="show[0] = true">НАЖМИ И УЗРИ СВОЮ КАРТУ ДНЯ</el-button></div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup lang="js">
 import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
-import { shallowRef, provide, useTemplateRef, watch } from "vue";
+import { reactive, provide, useTemplateRef, watch, shallowRef } from "vue";
 import gsap from "gsap";
 import { retrieveRawInitData } from "@telegram-apps/sdk";
+import { isTMA } from "@telegram-apps/bridge";
+import { useCookies } from "@vueuse/integrations/useCookies";
+import { ElButton, ElNotification } from "element-plus";
+import { useSpeechSynthesis } from "@vueuse/core";
 
-const show = shallowRef(false),
-  hide = shallowRef(true),
-  back = useTemplateRef("backRef");
+const show = reactive(new Array(3).fill(false)),
+  back = useTemplateRef("backRef"),
+  { get, set } = useCookies(["card"]),
+  title = "возвращайся завтра за новой картой",
+  { isSupported, speak } = useSpeechSynthesis(title, { lang: 'ru-Ru' }),
+  cardNumber = shallowRef();
 
 provide("show", show);
+provide("cardNumber", cardNumber);
 
-watch(show, () => {
-  gsap.to(back.value, {
-    opacity: 0, duration: 2, delay: 2, onComplete: () => {
-      hide.value = false;
-    }
-  });
+watch(() => show[2], () => {
+  ElNotification.success({ title, showClose: false, });
+  if (isSupported) speak();
 });
 
-
-try {
+if (await isTMA()) {
   const initDataRaw = retrieveRawInitData();
   fetch("https://localhost:3000", {
     headers: {
       Authorization: `tma ${initDataRaw}`
     },
   });
-} catch(err) {
-  console.log(err);
- };
+} else {
+  cardNumber.value = parseInt(get("card"));
+  if (isNaN(cardNumber.value)) cardNumber.value = Math.floor(Math.random() * 100) + 1;
+  else show.fill(true);
+}
 
+watch(() => show[0], () => {
+  const now = new Date();
+  set("card", cardNumber.value, { maxAge: 24 * 60 * 60 - now.getHours() * 60 * 60 - now.getMinutes() * 60 - now.getSeconds() });
+  gsap.to(back.value, {
+    opacity: 0, duration: 2, delay: 2, onComplete: () => {
+      show[2] = true;
+    }
+  });
+});
 
 </script>
 
 <style>
+@import "./node_modules/element-plus/dist/index.css";
+@import "./node_modules/animate.css/animate.min.css";
+
 .circle1 {
   width: 80px;
   height: 80px;
