@@ -53,7 +53,7 @@ provide("card", card);
 provide("cardNumber", cardNumber);
 
 watch(() => show[2], () => {
-  ElNotification.success({ title, showClose: false, offset: 100 });
+  ElNotification.success({ title, showClose: false, offset: 50 });
   if (isSupported) speak();
 });
 
