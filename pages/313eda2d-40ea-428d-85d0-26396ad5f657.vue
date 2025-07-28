@@ -22,7 +22,7 @@
     leave-active-class="animate__animated animate__bounceOutRight">
     <div class="fixed left-0 right-0 bottom-0" v-show="!show[0]">
       <div class="w-fit mx-auto mb-12"><el-button size="large" color="DarkMagenta" round dark
-          @click="show[0] = true">НАЖМИ И УЗРИ СВОЮ КАРТУ ДНЯ</el-button></div>
+          @click="() => { if (card) show[0] = true }">НАЖМИ И УЗРИ СВОЮ КАРТУ ДНЯ</el-button></div>
     </div>
   </Transition>
 </template>
@@ -32,45 +32,66 @@ import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
 import { reactive, provide, useTemplateRef, watch, shallowRef } from "vue";
 import gsap from "gsap";
-import { retrieveRawInitData } from "@telegram-apps/sdk";
+import { cloudStorage } from "@telegram-apps/sdk";
 import { isTMA } from "@telegram-apps/bridge";
-import { useCookies } from "@vueuse/integrations/useCookies";
 import { ElButton, ElNotification } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
 
 const show = reactive(new Array(3).fill(false)),
   back = useTemplateRef("backRef"),
-  { get, set } = useCookies(["card"]),
   title = "возвращайся завтра за новой картой",
   { isSupported, speak } = useSpeechSynthesis(title, { lang: 'ru-Ru' }),
-  cardNumber = shallowRef();
+  cardNumber = shallowRef(),
+  card = shallowRef(),
+  now = new Date(),
+  tma = await isTMA() && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
+
+let cardDate;
 
 provide("show", show);
+provide("card", card);
 provide("cardNumber", cardNumber);
 
 watch(() => show[2], () => {
-  ElNotification.success({ title, showClose: false, });
+  ElNotification.success({ title, showClose: false, offset: 100 });
   if (isSupported) speak();
 });
 
 /*
-if (await isTMA()) {
-  const initDataRaw = retrieveRawInitData();
-  fetch("https://localhost:3000", {
-    headers: {
-      Authorization: `tma ${initDataRaw}`
-    },
-  });
-} else {
+const initDataRaw = retrieveRawInitData();
+fetch("https://localhost:3000", {
+  headers: {
+    Authorization: `tma ${initDataRaw}`
+  },
+});
 */
-  cardNumber.value = parseInt(get("card"));
-  if (isNaN(cardNumber.value)) cardNumber.value = Math.floor(Math.random() * 100) + 1;
-  else show.fill(true);
-//}
+
+if (tma) {
+  cardNumber.value = parseInt(await cloudStorage.getItem("card-number"));
+  cardDate = new Date(await cloudStorage.getItem("card-date"));
+} else {
+  cardNumber.value = parseInt(localStorage.getItem("card-number"));
+  cardDate = new Date(localStorage.getItem("card-date"));
+}
+if (
+  isNaN(cardNumber.value) ||
+  isNaN(cardDate.valueOf()) ||
+  !(
+    now.getFullYear() === cardDate.getFullYear() &&
+    now.getMonth() === cardDate.getMonth() &&
+    now.getDate() === cardDate.getDate()
+  )
+) cardNumber.value = Math.floor(Math.random() * 100) + 1;
+else show.fill(true);
 
 watch(() => show[0], () => {
-  const now = new Date();
-  set("card", cardNumber.value, { maxAge: 24 * 60 * 60 - now.getHours() * 60 * 60 - now.getMinutes() * 60 - now.getSeconds() });
+  if (tma) {
+    cloudStorage.setItem("card-number", cardNumber.value);
+    cloudStorage.setItem("card-date", new Date().toISOString());
+  } else {
+    localStorage.setItem("card-number", cardNumber.value);
+    localStorage.setItem("card-date", new Date().toISOString());
+  }
   gsap.to(back.value, {
     opacity: 0, duration: 2, delay: 2, onComplete: () => {
       show[2] = true;

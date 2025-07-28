@@ -5,14 +5,12 @@
     "@tresjs/core": "^4.3.6",
     "@tresjs/leches": "^0.14.1",
     "@tresjs/post-processing": "^2.4.0",
-    "@vueuse/core": "^13.5.0",
-    "@vueuse/integrations": "^13.5.0",
-    "@vueuse/shared": "^13.5.0",
+    "@vueuse/core": "^13.6.0",
+    "@vueuse/shared": "^13.6.0",
     "animate.css": "^4.1.1",
     "element-plus": "^2.10.4",
     "gsap": "^3.13.0",
     "postprocessing": "^6.37.6",
-    "three": "^0.178.0",
-    "universal-cookie": "^8.0.1"
+    "three": "^0.178.0"
   }
 }
