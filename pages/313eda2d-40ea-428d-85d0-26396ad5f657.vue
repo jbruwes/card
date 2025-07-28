@@ -44,7 +44,7 @@ const show = reactive(new Array(3).fill(false)),
   cardNumber = shallowRef(),
   card = shallowRef(),
   now = new Date(),
-  tma = await isTMA() && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
+  tma = await isTMA();// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
 
   console.log(1, await isTMA());
   console.log(2, cloudStorage.isSupported());
