@@ -46,6 +46,11 @@ const show = reactive(new Array(3).fill(false)),
   now = new Date(),
   tma = await isTMA() && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
 
+  console.log(1, await isTMA());
+  console.log(2, cloudStorage.isSupported());
+  console.log(3, cloudStorage.getItem.isAvailable());
+  console.log(4, cloudStorage.setItem.isAvailable());
+
 let cardDate;
 
 provide("show", show);
@@ -69,6 +74,10 @@ fetch("https://localhost:3000", {
 if (tma) {
   cardNumber.value = parseInt(await cloudStorage.getItem("card-number"));
   cardDate = new Date(await cloudStorage.getItem("card-date"));
+
+console.log(5, cardNumber.value);
+console.log(6, cardDate);
+
 } else {
   cardNumber.value = parseInt(localStorage.getItem("card-number"));
   cardDate = new Date(localStorage.getItem("card-date"));
