@@ -32,7 +32,7 @@ import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
 import { reactive, provide, useTemplateRef, watch, shallowRef } from "vue";
 import gsap from "gsap";
-import { cloudStorage } from "@telegram-apps/sdk";
+import { cloudStorage, init } from "@telegram-apps/sdk";
 import { isTMA } from "@telegram-apps/bridge";
 import { ElButton, ElNotification } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
@@ -46,10 +46,12 @@ const show = reactive(new Array(3).fill(false)),
   now = new Date(),
   tma = await isTMA();// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
 
-  console.log(1, await isTMA());
-  console.log(2, cloudStorage.isSupported());
-  console.log(3, cloudStorage.getItem.isAvailable());
-  console.log(4, cloudStorage.setItem.isAvailable());
+if (tma) init();
+
+console.log(1, await isTMA());
+console.log(2, cloudStorage.isSupported());
+console.log(3, cloudStorage.getItem.isAvailable());
+console.log(4, cloudStorage.setItem.isAvailable());
 
 let cardDate;
 
@@ -75,8 +77,8 @@ if (tma) {
   cardNumber.value = parseInt(await cloudStorage.getItem("card-number"));
   cardDate = new Date(await cloudStorage.getItem("card-date"));
 
-console.log(5, cardNumber.value);
-console.log(6, cardDate);
+  console.log(5, cardNumber.value);
+  console.log(6, cardDate);
 
 } else {
   cardNumber.value = parseInt(localStorage.getItem("card-number"));
