@@ -39,41 +39,28 @@ import gsap from "gsap";
 
 extend({ EffectComposer, UnrealBloomPass, RenderPass, OutputPass });
 
-const show = inject("show"),
-  cardNumber = inject("cardNumber"),
+const cardNumber = inject("cardNumber"),
+  texture = shallowRef(await useTexture([`./images/deck1/Star${cardNumber.value}.jpg`])),
+  show = inject("show"),
   composer = useTemplateRef("composerRef"),
   card = useTemplateRef("cardRef"),
   injectedCard = inject("card"),
-  vertexShader = await useLoader(FileLoader, "./shaders/plane.vert"),
-  fragmentShaderFront = await useLoader(FileLoader, "./shaders/front.frag"),
-  fragmentShaderBack = await useLoader(FileLoader, "./shaders/back.frag"),
-  mesh2 = await useLoader(OBJLoader, "./models/skull5.obj"),
   { renderer, sizes: { width, height } } = useTresContext(),
   sceneRTT = new Scene(),
   cameraRTT = new PerspectiveCamera(50, 10 / 15, 30,
     100),
   { onBeforeRender } = useLoop(),
-  skullmaterial = new ShaderMaterial({
-    uniforms: {
-      time: { type: "f", value: 0.0 },
-      color1: { value: new Vector3(65, 0, 170) },
-      color0: { value: new Vector3(197, 81, 245) },
-      resolution: { value: new Vector2(width.value, height.value) }
-    },
-    fragmentShader: await useLoader(FileLoader, "./shaders/skull.frag"),
-    vertexShader: await useLoader(FileLoader, "./shaders/skull.vert")
-  }),
+  spheregeo = new SphereGeometry(1.5, 32, 32),
+  basicmat = new MeshBasicMaterial({ color: 0x00ffff }),
+  eye = new Mesh(spheregeo, basicmat),
+  eye2 = new Mesh(spheregeo, basicmat),
+  modelgroup = new Object3D(),
   cardtemplate = { type: "t", value: new TextureLoader().load("./images/cardtemplateback4.png") },
   backtexture = { type: "t", value: new TextureLoader().load("./images/color3.jpg") },
   noise = { type: "t", value: new TextureLoader().load("./images/noise2.png") },
   noiseTex = { type: "t", value: new TextureLoader().load("./images/rgbnoise2.png") },
   color = { type: "t", value: new TextureLoader().load("./images/color11.png") },
   skullrender = { type: "t", value: new TextureLoader().load("./images/flower3.png") },
-  spheregeo = new SphereGeometry(1.5, 32, 32),
-  basicmat = new MeshBasicMaterial({ color: 0x00ffff }),
-  eye = new Mesh(spheregeo, basicmat),
-  eye2 = new Mesh(spheregeo, basicmat),
-  modelgroup = new Object3D(),
   uniformsFront = computed(() => ({
     cardtemplate, backtexture, noise, noiseTex, color,
     resolution: { value: new Vector2(width.value, height.value) },
@@ -83,7 +70,20 @@ const show = inject("show"),
     cardtemplate, backtexture, noise, skullrender, noiseTex, color,
     resolution: { value: new Vector2(width.value, height.value) },
   })),
-  texture = shallowRef(await useTexture([`./images/deck1/Star${cardNumber.value}.jpg`]));
+  vertexShader = await useLoader(FileLoader, "./shaders/plane.vert"),
+  fragmentShaderFront = await useLoader(FileLoader, "./shaders/front.frag"),
+  fragmentShaderBack = await useLoader(FileLoader, "./shaders/back.frag"),
+  mesh2 = await useLoader(OBJLoader, "./models/skull5.obj"),
+  skullmaterial = new ShaderMaterial({
+    uniforms: {
+      time: { type: "f", value: 0.0 },
+      color1: { value: new Vector3(65, 0, 170) },
+      color0: { value: new Vector3(197, 81, 245) },
+      resolution: { value: new Vector2(width.value, height.value) }
+    },
+    fragmentShader: await useLoader(FileLoader, "./shaders/skull.frag"),
+    vertexShader: await useLoader(FileLoader, "./shaders/skull.vert")
+  });
 
 
 watch(() => show[0], () => {
