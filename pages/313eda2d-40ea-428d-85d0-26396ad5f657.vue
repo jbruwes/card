@@ -42,7 +42,7 @@ const show = reactive(new Array(3).fill(false)),
   title = "возвращайся завтра за новой картой",
   { isSupported, speak } = useSpeechSynthesis(title, { lang: 'ru-Ru' }),
   cardNumber = shallowRef(),
-  card = shallowRef(),
+  card = shallowRef(false),
   now = new Date(),
   tma = await isTMA();// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
 
@@ -52,7 +52,6 @@ let cardDate;
 
 provide("show", show);
 provide("card", card);
-provide("cardNumber", cardNumber);
 
 watch(() => show[2], () => {
   ElNotification.success({ title, showClose: false, position: "bottom-left" });
@@ -85,6 +84,8 @@ if (
   )
 ) cardNumber.value = Math.floor(Math.random() * 100) + 1;
 else show.fill(true);
+
+provide("cardNumber", cardNumber);
 
 watch(() => show[0], () => {
   if (tma) {
