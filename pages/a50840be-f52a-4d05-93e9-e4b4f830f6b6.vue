@@ -1,22 +1,23 @@
 <template>
-  <TresGroup ref="cardRef">
-    <Levioso :speed="5">
-      <TresMesh v-if="!show[1]">
-        <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
-        <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderFront" :uniforms="uniformsFront"
-          :transparent="true" :depthWrite="false">
-        </TresShaderMaterial>
-      </TresMesh>
-      <Image :url="`./images/deck1/Star${cardNumber}.jpg`" :radius="0.5" :transparent="true" :scale="[7, 10]" v-else>
-      </Image>
-      <TresMesh :rotation-y="Math.PI">
-        <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
-        <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderBack" :uniforms="uniformsBack"
-          :transparent="true" :depthWrite="false">
-        </TresShaderMaterial>
-      </TresMesh>
-    </Levioso>
-  </TresGroup>
+  <Suspense>
+    <TresGroup ref="cardRef">
+      <Levioso :speed="5">
+        <TresMesh v-if="!show[1]">
+          <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
+          <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderFront" :uniforms="uniformsFront"
+            :transparent="true" :depthWrite="false">
+          </TresShaderMaterial>
+        </TresMesh>
+        <Image :texture="texture" :radius="0.5" :transparent="true" :scale="[7, 10]" v-else></Image>
+        <TresMesh :rotation-y="Math.PI">
+          <TresPlaneGeometry :args="[7, 10]"></TresPlaneGeometry>
+          <TresShaderMaterial :vertex-shader :fragment-shader="fragmentShaderBack" :uniforms="uniformsBack"
+            :transparent="true" :depthWrite="false">
+          </TresShaderMaterial>
+        </TresMesh>
+      </Levioso>
+    </TresGroup>
+  </Suspense>
   <TresEffectComposer ref="composerRef" :args="[renderer]" :set-size="[width, height]" :renderToScreen="false">
     <TresRenderPass :args="[sceneRTT, cameraRTT]" attach="passes-0"></TresRenderPass>
     <TresUnrealBloomPass :args="[undefined, 0.5, 2.29, 0]" attach="passes-1"></TresUnrealBloomPass>
@@ -31,11 +32,10 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { extend, useLoop, useTresContext, useLoader } from "@tresjs/core";
-import { useTemplateRef, computed, inject, watch } from "vue";
+import { extend, useLoop, useTresContext, useLoader, useTexture } from "@tresjs/core";
+import { useTemplateRef, computed, inject, watch, shallowRef } from "vue";
 import { Levioso, Image } from "@tresjs/cientos";
 import gsap from "gsap";
-import { syncRef } from "@vueuse/core";
 
 extend({ EffectComposer, UnrealBloomPass, RenderPass, OutputPass });
 
@@ -82,9 +82,9 @@ const show = inject("show"),
   uniformsBack = computed(() => ({
     cardtemplate, backtexture, noise, skullrender, noiseTex, color,
     resolution: { value: new Vector2(width.value, height.value) },
-  }));
+  })),
+  texture = shallowRef(await useTexture([`./images/deck1/Star${cardNumber.value}.jpg`]));
 
-syncRef(injectedCard, card, { direction: "rtl" });
 
 watch(() => show[0], () => {
   gsap.timeline().to(card.value.rotation, {
@@ -93,6 +93,10 @@ watch(() => show[0], () => {
     }
   }).to(card.value.rotation, { duration: 2, y: 2 * Math.PI });
 });
+
+watch(card, () => {
+  injectedCard.value = true;
+}, { once: true });
 
 onBeforeRender(({ clock: { oldTime } }) => {
   if (!show[1]) {
