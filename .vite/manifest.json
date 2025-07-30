@@ -1,6 +1,6 @@
 {
-  "_compiler-sfc-CHbDt8t7.js": {
-    "file": "assets/compiler-sfc-CHbDt8t7.js",
+  "_compiler-sfc-4yqCFQUb.js": {
+    "file": "assets/compiler-sfc-4yqCFQUb.js",
     "name": "compiler-sfc"
   },
   "_sucrase-Cw4LZf8f.js": {
@@ -8,13 +8,13 @@
     "name": "sucrase"
   },
   "index.html": {
-    "file": "assets/index-B3eq4WTJ.js",
+    "file": "assets/index-CS9f0bTe.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "_sucrase-Cw4LZf8f.js",
-      "_compiler-sfc-CHbDt8t7.js"
+      "_compiler-sfc-4yqCFQUb.js"
     ],
     "dynamicImports": [
       "src/views/PageView.vue",
@@ -26,36 +26,36 @@
     ]
   },
   "src/views/NotFoundView.vue": {
-    "file": "assets/NotFoundView-j-Z6uV9k.js",
+    "file": "assets/NotFoundView-iOoHSPOL.js",
     "name": "NotFoundView",
     "src": "src/views/NotFoundView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
       "_sucrase-Cw4LZf8f.js",
-      "_compiler-sfc-CHbDt8t7.js"
+      "_compiler-sfc-4yqCFQUb.js"
     ]
   },
   "src/views/PageView.vue": {
-    "file": "assets/PageView-4WsdjMiM.js",
+    "file": "assets/PageView-Drw8ud6t.js",
     "name": "PageView",
     "src": "src/views/PageView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
       "_sucrase-Cw4LZf8f.js",
-      "_compiler-sfc-CHbDt8t7.js"
+      "_compiler-sfc-4yqCFQUb.js"
     ]
   },
   "src/views/RootView.vue": {
-    "file": "assets/RootView-D5JhjsWP.js",
+    "file": "assets/RootView-DATYZo2X.js",
     "name": "RootView",
     "src": "src/views/RootView.vue",
     "isDynamicEntry": true,
     "imports": [
       "index.html",
       "_sucrase-Cw4LZf8f.js",
-      "_compiler-sfc-CHbDt8t7.js"
+      "_compiler-sfc-4yqCFQUb.js"
     ]
   }
 }

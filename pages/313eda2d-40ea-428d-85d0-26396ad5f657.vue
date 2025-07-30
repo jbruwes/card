@@ -12,7 +12,21 @@
 
   <TresCanvas window-size>
     <TresPerspectiveCamera :position="[0, 0, 20]"></TresPerspectiveCamera>
-    <router-view></router-view>
+    <RouterView v-slot="{ Component }">
+      <Suspense>
+        <component :is="Component"></component>
+        <template #fallback>
+          <Levioso :speed="5">
+            <TresMesh :position-y="2" ref="heartRef">
+              <TresExtrudeGeometry :args="[heartShapeFront, extrudeSettings]"></TresExtrudeGeometry>
+              <TresMeshPhysicalMaterial v-bind="materialProps"></TresMeshPhysicalMaterial>
+            </TresMesh>
+          </Levioso>
+        </template>
+      </Suspense>
+    </RouterView>
+    <TresAmbientLight :intensity="3"></TresAmbientLight>
+    <TresDirectionalLight :position="[5, 5, 7.5]" :intensity="10"></TresDirectionalLight>
     <EffectComposer>
       <SMAA></SMAA>
       <Glitch :goWild="true" v-if="!show[0]"></Glitch>
@@ -30,21 +44,50 @@
 <script setup lang="js">
 import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
-import { reactive, provide, useTemplateRef, watch, shallowRef } from "vue";
+import { reactive, provide, useTemplateRef, watch, shallowRef, onMounted } from "vue";
 import gsap from "gsap";
 import { cloudStorage, init } from "@telegram-apps/sdk";
 import { isTMA } from "@telegram-apps/bridge";
 import { ElButton, ElNotification } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
+import { Shape } from "three";
+import { Levioso } from "@tresjs/cientos";
 
 const show = reactive(new Array(3).fill(false)),
   back = useTemplateRef("backRef"),
+  heart = useTemplateRef("heartRef"),
   title = "возвращайся завтра за новой картой",
   { isSupported, speak } = useSpeechSynthesis(title, { lang: 'ru-Ru' }),
   cardNumber = shallowRef(),
   card = shallowRef(false),
   now = new Date(),
-  tma = await isTMA();// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
+  tma = await isTMA(),// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
+  createHeartShape = (scale) => {
+    const shape = new Shape(),
+      x = 0,
+      y = 0;
+    shape.moveTo(x, y);
+    shape.bezierCurveTo(x, y, x - 0.5 * scale, y + 2.5 * scale, x - 2.5 * scale, y + 2.5 * scale);
+    shape.bezierCurveTo(x - 6.5 * scale, y + 2.5 * scale, x - 6.5 * scale, y - 1.5 * scale, x - 6.5 * scale, y - 1.5 * scale);
+    shape.bezierCurveTo(x - 6.5 * scale, y - 4.5 * scale, x - 3.5 * scale, y - 7 * scale, x, y - 9.5 * scale);
+    shape.bezierCurveTo(x + 3.5 * scale, y - 7 * scale, x + 6.5 * scale, y - 4.5 * scale, x + 6.5 * scale, y - 1.5 * scale);
+    shape.bezierCurveTo(x + 6.5 * scale, y - 1.5 * scale, x + 6.5 * scale, y + 2.5 * scale, x + 2.5 * scale, y + 2.5 * scale);
+    shape.bezierCurveTo(x + 0.5 * scale, y + 2.5 * scale, x, y, x, y);
+    return shape
+  },
+  extrudeSettings = {
+    depth: 0.1,
+    bevelEnabled: true,
+    bevelSegments: 2,
+    steps: 2,
+    bevelSize: 0.25,
+    bevelThickness: 0.25,
+  },
+  heartShapeFront = createHeartShape(0.35);
+
+onMounted(() => {
+  gsap.to(heart.value.scale, { duration: 1, x: 1.2, y: 1.3, ease: "Elastic.easeOut", repeat: -1 });
+});
 
 if (tma) init();
 
@@ -84,6 +127,16 @@ if (
   )
 ) cardNumber.value = Math.floor(Math.random() * 100) + 1;
 else show.fill(true);
+
+const materialProps = {
+  color: show[0] ? "#06b6d4" : "#a21caf",
+  reflectivity: 0.75,
+  ior: 1.5,
+  roughness: 0.75,
+  clearcoat: 0.01,
+  clearcoatRoughness: 0.15,
+  transmission: 0.7,
+};
 
 provide("cardNumber", cardNumber);
 
