@@ -1,93 +1,85 @@
 <template>
-
-  <div class="inset-0 fixed bg-linear-to-r from-cyan-500 to-blue-500">
+  <div class="inset-0 fixed bg-linear-to-r from-cyan-500 to-blue-500" un-cloak>
     <ul class="absolute inset-0 overflow-hidden">
       <li v-for="i in 10" class="absolute bg-white/20 -bottom-48 animate-[animate_25s_linear_infinite] rounded-full"
         :class="`circle${i}`"></li>
     </ul>
   </div>
-
-  <div class="fixed inset-0 bg-radial-[125%_125%_at_50%_10%] from-black from-40% to-fuchsia-700" ref="backRef"
-    v-if="!show[2]"></div>
-
+  <Transition leave-active-class="animate__animated animate__fadeOut animate__slow">
+    <div class="fixed inset-0 bg-radial-[125%_125%_at_50%_10%] from-black from-40% to-fuchsia-700" v-show="!show[1]"
+      un-cloak></div>
+  </Transition>
   <TresCanvas window-size>
     <TresPerspectiveCamera :position="[0, 0, 20]"></TresPerspectiveCamera>
-    <RouterView v-slot="{ Component }">
-      <Suspense>
-        <component :is="Component"></component>
-        <template #fallback>
-          <Levioso :speed="5">
-            <TresMesh :position-y="2" ref="heartRef">
-              <TresExtrudeGeometry :args="[heartShapeFront, extrudeSettings]"></TresExtrudeGeometry>
-              <TresMeshPhysicalMaterial v-bind="materialProps"></TresMeshPhysicalMaterial>
-            </TresMesh>
-          </Levioso>
-        </template>
-      </Suspense>
-    </RouterView>
-    <TresAmbientLight :intensity="3"></TresAmbientLight>
-    <TresDirectionalLight :position="[5, 5, 7.5]" :intensity="10"></TresDirectionalLight>
+    <Suspense>
+      <RouterView></RouterView>
+    </Suspense>
     <EffectComposer>
       <SMAA></SMAA>
-      <Glitch :goWild="true" v-if="!show[0]"></Glitch>
+      <Glitch :goWild="true" v-if="!show[0] && hasFinishLoading"></Glitch>
     </EffectComposer>
   </TresCanvas>
-  <Transition name="custom-classes" enter-active-class="animate__animated animate__tada"
-    leave-active-class="animate__animated animate__bounceOutRight">
-    <div class="fixed left-0 right-0 bottom-0" v-show="!show[0]">
-      <div class="w-fit mx-auto mb-12"><el-button size="large" color="DarkMagenta" round dark
-          @click="() => { if (card) show[0] = true }">НАЖМИ И УЗРИ СВОЮ КАРТУ ДНЯ</el-button></div>
+  <div class="fixed inset-0 flex flex-col justify-between">
+    <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
+      enter-to-class="animate-none">
+      <el-button v-if="show[2] && hasFinishLoading" type="primary" tag="a" size="large" :icon="PhoneFilled"
+        href="https://bryusova.ru" target="_blank" rel="noopener noreferrer" round
+        class="mx-auto mt-12 shadow-xl shadow-cyan-500/50 animate-pulse">ПОМОГУ РАЗОБРАТЬСЯ</el-button>
+    </Transition>
+    <el-popover placement="bottom" title="Что такое МАК-карты" width="80%" trigger="click" effect="dark"
+      popper-style="word-break: normal;" :content>
+      <template #reference>
+        <div v-if="!(show[0] && show[1])" class="mx-auto w-fit mt-12">
+          <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast"
+            enter-from-class="animate-none" enter-to-class="animate-none"
+            leave-active-class="animate__animated animate__fadeOutUp animate__slower" leave-from-class="animate-none"
+            leave-to-class="animate-none">
+            <el-button v-if="!show[0] && hasFinishLoading" color="DarkMagenta" dark :icon="QuestionFilled">УЗНАЙ О МАК
+              КАРТАХ</el-button>
+          </Transition>
+        </div>
+      </template>
+    </el-popover>
+    <div v-if="!(show[0] && show[1])" class="self-end mx-auto w-fit mb-12">
+      <Transition enter-active-class="animate__animated animate__fadeInUp animate__fast" enter-from-class="animate-none"
+        enter-to-class="animate-none" leave-active-class="animate__animated animate__fadeOutDown animate__slower"
+        leave-from-class="animate-none" leave-to-class="animate-none">
+        <el-button v-if="!show[0] && hasFinishLoading" :icon="View"
+          class="shadow-xl shadow-cyan-500/50 animate-pulse !outline-2 !outline-offset-4 !outline-sky-500" size="large"
+          color="DarkMagenta" round dark @click="() => { if (card) show[0] = true }">НАЖМИ И УЗРИ СВОЮ КАРТУ
+          ДНЯ</el-button>
+      </Transition>
     </div>
-  </Transition>
+  </div>
+  <Teleport to="body">
+    <div v-if="!hasFinishLoading"
+      style="position:fixed;display:flex;justify-content:center;align-items:center;inset: 0px;">
+      <el-progress type="circle" :percentage="progress"></el-progress>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="js">
 import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
-import { reactive, provide, useTemplateRef, watch, shallowRef, onMounted } from "vue";
-import gsap from "gsap";
+import { reactive, provide, watch, shallowRef } from "vue";
 import { cloudStorage, init } from "@telegram-apps/sdk";
 import { isTMA } from "@telegram-apps/bridge";
-import { ElButton, ElNotification } from "element-plus";
+import { ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
-import { Shape } from "three";
-import { Levioso } from "@tresjs/cientos";
+import { useProgress } from "@tresjs/cientos";
+import { RouterView } from "vue-router";
+import { View, QuestionFilled, PhoneFilled } from "@element-plus/icons-vue"
 
 const show = reactive(new Array(3).fill(false)),
-  back = useTemplateRef("backRef"),
-  heart = useTemplateRef("heartRef"),
   title = "возвращайся завтра за новой картой",
+  content = "Метафорические ассоциативные карты (МАК) — профессиональный инструмент психолога, который помогает «разговорить» Ваше подсознание. Потому что именно в подсознании и находятся ответы на все наши вопросы! Через интерпретацию изображений Вы получаете доступ к тому, что остаётся за пределами сознательного контроля.",
   { isSupported, speak } = useSpeechSynthesis(title, { lang: 'ru-Ru' }),
   cardNumber = shallowRef(),
   card = shallowRef(false),
   now = new Date(),
   tma = await isTMA(),// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
-  createHeartShape = (scale) => {
-    const shape = new Shape(),
-      x = 0,
-      y = 0;
-    shape.moveTo(x, y);
-    shape.bezierCurveTo(x, y, x - 0.5 * scale, y + 2.5 * scale, x - 2.5 * scale, y + 2.5 * scale);
-    shape.bezierCurveTo(x - 6.5 * scale, y + 2.5 * scale, x - 6.5 * scale, y - 1.5 * scale, x - 6.5 * scale, y - 1.5 * scale);
-    shape.bezierCurveTo(x - 6.5 * scale, y - 4.5 * scale, x - 3.5 * scale, y - 7 * scale, x, y - 9.5 * scale);
-    shape.bezierCurveTo(x + 3.5 * scale, y - 7 * scale, x + 6.5 * scale, y - 4.5 * scale, x + 6.5 * scale, y - 1.5 * scale);
-    shape.bezierCurveTo(x + 6.5 * scale, y - 1.5 * scale, x + 6.5 * scale, y + 2.5 * scale, x + 2.5 * scale, y + 2.5 * scale);
-    shape.bezierCurveTo(x + 0.5 * scale, y + 2.5 * scale, x, y, x, y);
-    return shape
-  },
-  extrudeSettings = {
-    depth: 0.1,
-    bevelEnabled: true,
-    bevelSegments: 2,
-    steps: 2,
-    bevelSize: 0.25,
-    bevelThickness: 0.25,
-  },
-  heartShapeFront = createHeartShape(0.35);
-
-onMounted(() => {
-  gsap.to(heart.value.scale, { duration: 1, x: 1.2, y: 1.3, ease: "Elastic.easeOut", repeat: -1 });
-});
+  { hasFinishLoading, progress } = await useProgress();
 
 if (tma) init();
 
@@ -96,9 +88,11 @@ let cardDate;
 provide("show", show);
 provide("card", card);
 
-watch(() => show[2], () => {
-  ElNotification.success({ title, showClose: false, position: "bottom-left" });
-  if (isSupported) speak();
+watch([() => show[2], hasFinishLoading], ([value1, value2]) => {
+  if (value1 && value2) {
+    ElNotification.success({ title, showClose: false, position: "bottom-left", duration: 0 });
+    if (isSupported) speak();
+  }
 });
 
 /*
@@ -128,16 +122,6 @@ if (
 ) cardNumber.value = Math.floor(Math.random() * 100) + 1;
 else show.fill(true);
 
-const materialProps = {
-  color: show[0] ? "#06b6d4" : "#a21caf",
-  reflectivity: 0.75,
-  ior: 1.5,
-  roughness: 0.75,
-  clearcoat: 0.01,
-  clearcoatRoughness: 0.15,
-  transmission: 0.7,
-};
-
 provide("cardNumber", cardNumber);
 
 watch(() => show[0], () => {
@@ -148,11 +132,6 @@ watch(() => show[0], () => {
     localStorage.setItem("card-number", cardNumber.value);
     localStorage.setItem("card-date", new Date().toISOString());
   }
-  gsap.to(back.value, {
-    opacity: 0, duration: 2, delay: 2, onComplete: () => {
-      show[2] = true;
-    }
-  });
 });
 
 </script>
@@ -160,6 +139,17 @@ watch(() => show[0], () => {
 <style>
 @import "./node_modules/element-plus/dist/index.css";
 @import "./node_modules/animate.css/animate.min.css";
+
+.el-progress--circle .el-progress__text,
+.el-progress--dashboard .el-progress__text {
+  left: 0;
+  margin: 0;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+}
 
 .circle1 {
   width: 80px;

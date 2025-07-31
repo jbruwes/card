@@ -32,7 +32,7 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { extend, useLoop, useTresContext, useLoader, useTexture } from "@tresjs/core";
+import { extend, useLoop, useTresContext, useLoader } from "@tresjs/core";
 import { useTemplateRef, computed, inject, watch, shallowRef } from "vue";
 import { Levioso, Image } from "@tresjs/cientos";
 import gsap from "gsap";
@@ -40,7 +40,7 @@ import gsap from "gsap";
 extend({ EffectComposer, UnrealBloomPass, RenderPass, OutputPass });
 
 const cardNumber = inject("cardNumber"),
-  texture = shallowRef(await useTexture([`./images/deck1/Star${cardNumber.value}.jpg`])),
+  texture = shallowRef(new TextureLoader().load(`./images/deck1/Star${cardNumber.value}.jpg`)),
   show = inject("show"),
   composer = useTemplateRef("composerRef"),
   card = useTemplateRef("cardRef"),
@@ -91,7 +91,11 @@ watch(() => show[0], () => {
     duration: 2, y: Math.PI, onComplete: () => {
       show[1] = true;
     }
-  }).to(card.value.rotation, { duration: 2, y: 2 * Math.PI });
+  }).to(card.value.rotation, {
+    duration: 2, y: 2 * Math.PI, onComplete: () => {
+      show[2] = true;
+    }
+  });
 });
 
 watch(card, () => {
