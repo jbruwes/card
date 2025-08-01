@@ -19,17 +19,18 @@
       <Glitch :goWild="true" v-if="!show[0] && hasFinishLoading"></Glitch>
     </EffectComposer>
   </TresCanvas>
-  <div class="fixed inset-0 flex flex-col justify-between">
+  <div class="fixed inset-0 flex flex-col justify-between py-12">
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
-      <el-button v-if="show[2] && hasFinishLoading" type="primary" tag="a" size="large" :icon="PhoneFilled"
+      <el-button v-show="show[2] && hasFinishLoading" 
+      tag="a" size="large"
         href="https://bryusova.ru" target="_blank" rel="noopener noreferrer" round
-        class="mx-auto mt-12 shadow-xl shadow-cyan-500/50 animate-pulse">ПОМОГУ РАЗОБРАТЬСЯ</el-button>
+        class="mx-auto shadow-xl shadow-white animate-pulse">👩 ПОМОГУ РАЗОБРАТЬСЯ</el-button>
     </Transition>
     <el-popover placement="bottom" title="Что такое МАК-карты" width="80%" trigger="click" effect="dark"
       popper-style="word-break: normal;" :content>
       <template #reference>
-        <div v-if="!(show[0] && show[1])" class="mx-auto w-fit mt-12">
+        <div v-if="!(show[0] && show[1])" class="mx-auto w-fit">
           <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast"
             enter-from-class="animate-none" enter-to-class="animate-none"
             leave-active-class="animate__animated animate__fadeOutUp animate__slower" leave-from-class="animate-none"
@@ -40,14 +41,13 @@
         </div>
       </template>
     </el-popover>
-    <div v-if="!(show[0] && show[1])" class="self-end mx-auto w-fit mb-12">
+    <div v-if="!(show[0] && show[1])" class="self-end mx-auto w-fit">
       <Transition enter-active-class="animate__animated animate__fadeInUp animate__fast" enter-from-class="animate-none"
         enter-to-class="animate-none" leave-active-class="animate__animated animate__fadeOutDown animate__slower"
         leave-from-class="animate-none" leave-to-class="animate-none">
-        <el-button v-if="!show[0] && hasFinishLoading" :icon="View"
-          class="shadow-xl shadow-cyan-500/50 animate-pulse !outline-2 !outline-offset-4 !outline-sky-500" size="large"
-          color="DarkMagenta" round dark @click="() => { if (card) show[0] = true }">НАЖМИ И УЗРИ СВОЮ КАРТУ
-          ДНЯ</el-button>
+        <el-button v-if="!show[0] && hasFinishLoading"
+          class="shadow-xl shadow-cyan-500/50 animate-pulse" size="large"
+          color="DarkMagenta" round dark @click="() => { if (card) show[0] = true }">👁️ НАЖМИ И УЗРИ СВОЮ КАРТУ ДНЯ</el-button>
       </Transition>
     </div>
   </div>
@@ -69,12 +69,13 @@ import { ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
 import { useProgress } from "@tresjs/cientos";
 import { RouterView } from "vue-router";
-import { View, QuestionFilled, PhoneFilled } from "@element-plus/icons-vue"
+import { QuestionFilled, PhoneFilled } from "@element-plus/icons-vue"
 
 const show = reactive(new Array(3).fill(false)),
-  title = "возвращайся завтра за новой картой",
+  title="Карта дня 🙋‍♀️",
+  message = "возвращайся завтра за новой картой",
   content = "Метафорические ассоциативные карты (МАК) — профессиональный инструмент психолога, который помогает «разговорить» Ваше подсознание. Потому что именно в подсознании и находятся ответы на все наши вопросы! Через интерпретацию изображений Вы получаете доступ к тому, что остаётся за пределами сознательного контроля.",
-  { isSupported, speak } = useSpeechSynthesis(title, { lang: 'ru-Ru' }),
+  { isSupported, speak } = useSpeechSynthesis(message, { lang: "ru-RU" }),
   cardNumber = shallowRef(),
   card = shallowRef(false),
   now = new Date(),
@@ -90,7 +91,7 @@ provide("card", card);
 
 watch([() => show[2], hasFinishLoading], ([value1, value2]) => {
   if (value1 && value2) {
-    ElNotification.success({ title, showClose: false, position: "bottom-left", duration: 0 });
+    ElNotification({ title, message, showClose: false, position: "bottom-left", duration: 0 });
     if (isSupported) speak();
   }
 });
