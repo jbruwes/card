@@ -23,7 +23,7 @@
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
       <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
-        rel="noopener noreferrer" round class="mx-auto inset-shadow-sm inset-shadow-black/50 animate-pulse">👩 ПОМОГУ
+        rel="noopener noreferrer" round class="mx-auto animate-pulse shadow-xl">👩 ПОМОГУ
         РАЗОБРАТЬСЯ</el-button>
     </Transition>
     <el-popover placement="bottom" title="Что такое МАК-карты" width="80%" trigger="click" effect="dark"
