@@ -19,13 +19,12 @@
       <Glitch :goWild="true" v-if="!show[0] && hasFinishLoading"></Glitch>
     </EffectComposer>
   </TresCanvas>
-  <div class="fixed inset-0 flex flex-col justify-between py-12">
+  <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-20">
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
-      <el-button v-show="show[2] && hasFinishLoading" 
-      tag="a" size="large"
-        href="https://bryusova.ru" target="_blank" rel="noopener noreferrer" round
-        class="mx-auto shadow-xl shadow-white animate-pulse">👩 ПОМОГУ РАЗОБРАТЬСЯ</el-button>
+      <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
+        rel="noopener noreferrer" round class="mx-auto shadow-xl shadow-white animate-pulse">👩 ПОМОГУ
+        РАЗОБРАТЬСЯ</el-button>
     </Transition>
     <el-popover placement="bottom" title="Что такое МАК-карты" width="80%" trigger="click" effect="dark"
       popper-style="word-break: normal;" :content>
@@ -45,9 +44,9 @@
       <Transition enter-active-class="animate__animated animate__fadeInUp animate__fast" enter-from-class="animate-none"
         enter-to-class="animate-none" leave-active-class="animate__animated animate__fadeOutDown animate__slower"
         leave-from-class="animate-none" leave-to-class="animate-none">
-        <el-button v-if="!show[0] && hasFinishLoading"
-          class="shadow-xl shadow-cyan-500/50 animate-pulse" size="large"
-          color="DarkMagenta" round dark @click="() => { if (card) show[0] = true }">👁️ НАЖМИ И УЗРИ СВОЮ КАРТУ ДНЯ</el-button>
+        <el-button v-if="!show[0] && hasFinishLoading" class="shadow-xl shadow-cyan-500/50 animate-pulse" size="large"
+          color="DarkMagenta" round dark @click="() => { if (card) show[0] = true }">👁️ НАЖМИ И УЗРИ СВОЮ КАРТУ
+          ДНЯ</el-button>
       </Transition>
     </div>
   </div>
@@ -72,7 +71,7 @@ import { RouterView } from "vue-router";
 import { QuestionFilled, PhoneFilled } from "@element-plus/icons-vue"
 
 const show = reactive(new Array(3).fill(false)),
-  title="Карта дня 🙋‍♀️",
+  title = "Карта дня 🙋‍♀️",
   message = "возвращайся завтра за новой картой",
   content = "Метафорические ассоциативные карты (МАК) — профессиональный инструмент психолога, который помогает «разговорить» Ваше подсознание. Потому что именно в подсознании и находятся ответы на все наши вопросы! Через интерпретацию изображений Вы получаете доступ к тому, что остаётся за пределами сознательного контроля.",
   { isSupported, speak } = useSpeechSynthesis(message, { lang: "ru-RU" }),
