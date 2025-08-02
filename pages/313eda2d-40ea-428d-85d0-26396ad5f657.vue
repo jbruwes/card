@@ -19,7 +19,7 @@
       <Glitch :goWild="true" v-if="!show[0] && hasFinishLoading"></Glitch>
     </EffectComposer>
   </TresCanvas>
-  <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-20">
+  <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-12" :class="{ 'portrait:pt-20': tma }">
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
       <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
@@ -68,7 +68,8 @@ import { ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
 import { useProgress } from "@tresjs/cientos";
 import { RouterView } from "vue-router";
-import { QuestionFilled, PhoneFilled } from "@element-plus/icons-vue"
+import { QuestionFilled } from "@element-plus/icons-vue";
+import bridge from "@vkontakte/vk-bridge";
 
 const show = reactive(new Array(3).fill(false)),
   title = "Карта дня 🙋‍♀️",
@@ -78,10 +79,12 @@ const show = reactive(new Array(3).fill(false)),
   cardNumber = shallowRef(),
   card = shallowRef(false),
   now = new Date(),
-  tma = await isTMA(),// && cloudStorage.isSupported() && cloudStorage.getItem.isAvailable() && cloudStorage.setItem.isAvailable();
+  vk = bridge.isEmbedded(),
+  tma = !vk && await isTMA(),
   { hasFinishLoading, progress } = await useProgress();
 
-if (tma) init();
+if (vk) await bridge.send("VKWebAppInit");
+else if (tma) init();
 
 let cardDate;
 
@@ -104,7 +107,11 @@ fetch("https://localhost:3000", {
 });
 */
 
-if (tma) {
+if (vk) {
+  const { keys } = await bridge.send("VKWebAppStorageGet", { keys: ["card-number", "card-date"] });
+  cardNumber.value = parseInt(keys[0].value);
+  cardDate = new Date(keys[1].value);
+} else if (tma) {
   cardNumber.value = parseInt(await cloudStorage.getItem("card-number"));
   cardDate = new Date(await cloudStorage.getItem("card-date"));
 } else {
@@ -125,7 +132,10 @@ else show.fill(true);
 provide("cardNumber", cardNumber);
 
 watch(() => show[0], () => {
-  if (tma) {
+  if (vk) {
+    bridge.send("VKWebAppStorageSet", { key: "card-number", value: cardNumber.value.toString() });
+    bridge.send("VKWebAppStorageSet", { key: "card-date", value: new Date().toISOString() });
+  } else if (tma) {
     cloudStorage.setItem("card-number", cardNumber.value);
     cloudStorage.setItem("card-date", new Date().toISOString());
   } else {
