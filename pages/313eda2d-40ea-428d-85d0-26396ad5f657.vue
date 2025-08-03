@@ -23,8 +23,10 @@
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
       <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
-        rel="noopener noreferrer" round class="mx-auto animate-pulse shadow-xl">👩 ПОМОГУ
-        РАЗОБРАТЬСЯ</el-button>
+        rel="noopener noreferrer" class="mx-auto animate-pulse shadow-xl">
+        <div class="i-streamline:cursor-click-solid mr-2"></div>ПОМОГУ
+        РАЗОБРАТЬСЯ
+      </el-button>
     </Transition>
     <el-popover placement="bottom" title="Что такое МАК-карты" width="80%" trigger="click" effect="dark"
       popper-style="word-break: normal;" :content>
@@ -34,8 +36,10 @@
             enter-from-class="animate-none" enter-to-class="animate-none"
             leave-active-class="animate__animated animate__fadeOutUp animate__slower" leave-from-class="animate-none"
             leave-to-class="animate-none">
-            <el-button v-if="!show[0] && hasFinishLoading" color="DarkMagenta" dark :icon="QuestionFilled">УЗНАЙ О МАК
-              КАРТАХ</el-button>
+            <el-button v-if="!show[0] && hasFinishLoading" color="DarkMagenta" size="large" dark>
+              <div class="i-streamline:help-question-1-solid mr-2"></div>УЗНАЙ О МАК
+              КАРТАХ
+            </el-button>
           </Transition>
         </div>
       </template>
@@ -45,8 +49,10 @@
         enter-to-class="animate-none" leave-active-class="animate__animated animate__fadeOutDown animate__slower"
         leave-from-class="animate-none" leave-to-class="animate-none">
         <el-button v-if="!show[0] && hasFinishLoading" class="shadow-xl shadow-cyan-500/50 animate-pulse" size="large"
-          color="DarkMagenta" round dark @click="() => { if (card) show[0] = true }">👁️ НАЖМИ И УЗРИ СВОЮ КАРТУ
-          ДНЯ</el-button>
+          color="DarkMagenta" dark @click="() => { if (card) show[0] = true }">
+          <div class="i-streamline:eye-optic-remix mr-2"></div>НАЖМИ И УЗРИ СВОЮ КАРТУ
+          ДНЯ
+        </el-button>
       </Transition>
     </div>
   </div>
@@ -68,7 +74,6 @@ import { ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
 import { useProgress } from "@tresjs/cientos";
 import { RouterView } from "vue-router";
-import { QuestionFilled } from "@element-plus/icons-vue";
 import bridge from "@vkontakte/vk-bridge";
 
 const show = reactive(new Array(3).fill(false)),
