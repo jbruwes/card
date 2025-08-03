@@ -76,7 +76,21 @@ import { useProgress } from "@tresjs/cientos";
 import { RouterView } from "vue-router";
 import bridge from "@vkontakte/vk-bridge";
 
-const show = reactive(new Array(3).fill(false)),
+const isVKMA = () => {
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => resolve(false), 100);    
+    bridge.send("VKWebAppInit")
+      .then(() => {
+        clearTimeout(timeoutId);
+        resolve(true);
+      })
+      .catch(() => {
+        clearTimeout(timeoutId);
+        resolve(false);
+      });
+  });
+},
+show = reactive(new Array(3).fill(false)),
   title = "Карта дня 🙋‍♀️",
   message = "возвращайся завтра за новой картой",
   content = "Метафорические ассоциативные карты (МАК) — профессиональный инструмент психолога, который помогает «разговорить» Ваше подсознание. Потому что именно в подсознании и находятся ответы на все наши вопросы! Через интерпретацию изображений Вы получаете доступ к тому, что остаётся за пределами сознательного контроля.",
@@ -84,14 +98,10 @@ const show = reactive(new Array(3).fill(false)),
   cardNumber = shallowRef(),
   card = shallowRef(false),
   now = new Date(),
-  vk = bridge.isEmbedded(),
-  tma = !vk && await isTMA(),
+  [vkma, tma] = await Promise.all([isVKMA(), isTMA()]),
   { hasFinishLoading, progress } = await useProgress();
 
-console.log({vk, tma});
-
-if (vk) await bridge.send("VKWebAppInit");
-else if (tma) {init();console.log("init")}
+if (tma) init();
 
 let cardDate;
 
@@ -114,15 +124,11 @@ fetch("https://localhost:3000", {
 });
 */
 
-if (vk) {
+if (vkma) {
   const { keys } = await bridge.send("VKWebAppStorageGet", { keys: ["card-number", "card-date"] });
   cardNumber.value = parseInt(keys[0].value);
   cardDate = new Date(keys[1].value);
 } else if (tma) {
-
-console.log(await cloudStorage.getItem("card-number"));
-console.log(await cloudStorage.getItem("card-date"));
-
   cardNumber.value = parseInt(await cloudStorage.getItem("card-number"));
   cardDate = new Date(await cloudStorage.getItem("card-date"));
 } else {
@@ -143,7 +149,7 @@ else show.fill(true);
 provide("cardNumber", cardNumber);
 
 watch(() => show[0], () => {
-  if (vk) {
+  if (vkma) {
     bridge.send("VKWebAppStorageSet", { key: "card-number", value: cardNumber.value.toString() });
     bridge.send("VKWebAppStorageSet", { key: "card-date", value: new Date().toISOString() });
   } else if (tma) {
