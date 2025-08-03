@@ -88,8 +88,10 @@ const show = reactive(new Array(3).fill(false)),
   tma = !vk && await isTMA(),
   { hasFinishLoading, progress } = await useProgress();
 
+console.log({vk, tma});
+
 if (vk) await bridge.send("VKWebAppInit");
-else if (tma) init();
+else if (tma) {init();console.log("init")}
 
 let cardDate;
 
@@ -117,6 +119,10 @@ if (vk) {
   cardNumber.value = parseInt(keys[0].value);
   cardDate = new Date(keys[1].value);
 } else if (tma) {
+
+console.log(await cloudStorage.getItem("card-number"));
+console.log(await cloudStorage.getItem("card-date"));
+
   cardNumber.value = parseInt(await cloudStorage.getItem("card-number"));
   cardDate = new Date(await cloudStorage.getItem("card-date"));
 } else {
