@@ -11,7 +11,7 @@
     "animate.css": "^4.1.1",
     "element-plus": "^2.10.5",
     "gsap": "^3.13.0",
-    "postprocessing": "^6.37.6",
-    "three": "^0.178.0"
+    "postprocessing": "^6.37.7",
+    "three": "^0.179.1"
   }
 }
