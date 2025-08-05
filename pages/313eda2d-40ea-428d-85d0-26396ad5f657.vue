@@ -1,13 +1,13 @@
 <template>
-  <div class="inset-0 fixed bg-linear-to-r from-cyan-500 to-blue-500" un-cloak>
+  <div class="inset-0 fixed bg-linear-to-r from-cyan-500 to-blue-500" v-show="hasFinishLoading" un-cloak>
     <ul class="absolute inset-0 overflow-hidden">
       <li v-for="i in 10" class="absolute bg-white/20 -bottom-48 animate-[animate_25s_linear_infinite] rounded-full"
         :class="`circle${i}`"></li>
     </ul>
   </div>
   <Transition leave-active-class="animate__animated animate__fadeOut animate__slow">
-    <div class="fixed inset-0 bg-radial-[125%_125%_at_50%_10%] from-black from-40% to-fuchsia-700" v-show="!show[1]"
-      un-cloak></div>
+    <div class="fixed inset-0 bg-radial-[125%_125%_at_50%_10%] from-black from-40% to-fuchsia-700"
+      v-show="!show[1] && hasFinishLoading"></div>
   </Transition>
   <TresCanvas window-size v-show="hasFinishLoading">
     <TresPerspectiveCamera :position="[0, 0, 20]"></TresPerspectiveCamera>
@@ -19,7 +19,7 @@
       <Glitch :goWild="true" v-if="!show[0] && hasFinishLoading"></Glitch>
     </EffectComposer>
   </TresCanvas>
-  <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-12" :class="{ 'portrait:pt-20': tma }">
+  <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-12" :class="{ 'portrait:pt-20': tma }" un-cloak>
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
       <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
