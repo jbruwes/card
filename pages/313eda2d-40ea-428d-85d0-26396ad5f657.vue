@@ -9,7 +9,7 @@
     <div class="fixed inset-0 bg-radial-[125%_125%_at_50%_10%] from-black from-40% to-fuchsia-700" v-show="!show[1]"
       un-cloak></div>
   </Transition>
-  <TresCanvas window-size>
+  <TresCanvas window-size v-show="hasFinishLoading">
     <TresPerspectiveCamera :position="[0, 0, 20]"></TresPerspectiveCamera>
     <Suspense>
       <RouterView></RouterView>
@@ -30,8 +30,8 @@
             clip-rule="evenodd" />
         </svg>ПОМОГУ РАЗОБРАТЬСЯ</el-button>
     </Transition>
-    <el-popover placement="bottom" title="Что такое МАК-карты" width="80%" trigger="click" effect="dark"
-      popper-style="word-break: normal;" :content>
+    <el-popover placement="bottom" title="МАК-карта дня" width="80%" trigger="click" effect="dark"
+      popper-style="word-break: normal;" :content="description">
       <template #reference>
         <div v-if="!(show[0] && show[1])" class="mx-auto w-fit">
           <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast"
@@ -43,7 +43,7 @@
                 <path fill="currentColor" fill-rule="evenodd"
                   d="M14 7A7 7 0 1 1 0 7a7 7 0 0 1 14 0M5.75 5.25A1.25 1.25 0 1 1 7 6.5a.75.75 0 0 0-.75.75v.646a.75.75 0 1 0 1.5 0a2.751 2.751 0 1 0-3.5-2.646a.75.75 0 0 0 1.5 0M8 10.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0"
                   clip-rule="evenodd" />
-              </svg>УЗНАЙ О МАК КАРТАХ</el-button>
+              </svg>ОЧЕНЬ КРАТКАЯ ИНСТРУКЦИЯ</el-button>
           </Transition>
         </div>
       </template>
@@ -73,7 +73,7 @@
 <script setup lang="js">
 import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
-import { reactive, provide, watch, shallowRef } from "vue";
+import { reactive, provide, watch, shallowRef, inject } from "vue";
 import { cloudStorage, init } from "@telegram-apps/sdk";
 import { isTMA } from "@telegram-apps/bridge";
 import { ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
@@ -96,10 +96,11 @@ const isVKMA = () => {
       });
   });
 },
+  { id } = defineProps(["id"]),
+  pages = inject("pages"),
+  { title, description } = pages[id],
   show = reactive(new Array(3).fill(false)),
-  title = "Карта дня 🙋‍♀️",
   message = "возвращайся завтра за новой картой",
-  content = "Метафорические ассоциативные карты (МАК) — профессиональный инструмент психолога, который помогает «разговорить» Ваше подсознание. Потому что именно в подсознании и находятся ответы на все наши вопросы! Через интерпретацию изображений Вы получаете доступ к тому, что остаётся за пределами сознательного контроля.",
   { isSupported, speak } = useSpeechSynthesis(message, { lang: "ru-RU" }),
   cardNumber = shallowRef(),
   card = shallowRef(false),
