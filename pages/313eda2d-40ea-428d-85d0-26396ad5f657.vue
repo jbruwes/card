@@ -109,7 +109,10 @@ const isVKMA = () => {
   [vkma, tma] = await Promise.all([isVKMA(), isTMA()]),
   { hasFinishLoading, progress } = await useProgress();
 
-if (tma) init();
+if (tma) {
+  init();
+  await viewport.mount();
+}
 
 let cardDate;
 
