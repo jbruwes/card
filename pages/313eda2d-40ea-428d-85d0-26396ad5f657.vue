@@ -111,7 +111,7 @@ const isVKMA = () => {
 
 if (tma) {
   init();
-  if (viewport.mount.isAvailable()) await viewport.mount();
+ // if (viewport.mount.isAvailable()) await viewport.mount();
 }
 
 let cardDate;
