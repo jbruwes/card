@@ -20,7 +20,7 @@
     </EffectComposer>
   </TresCanvas>
   <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-12"
-    :class="{ 'portrait:pt-20': tma && viewport.isFullscreen() }" un-cloak>
+    :class="{ 'portrait:pt-20': tma && viewport.isMounted() && viewport.isFullscreen() }" un-cloak>
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
       <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
