@@ -83,10 +83,21 @@ import { useProgress } from "@tresjs/cientos";
 import { RouterView } from "vue-router";
 import bridge from "@vkontakte/vk-bridge";
 
-const isVKMA = () => {
-  return new Promise((resolve) => {
+const isVKMA = () => new Promise((resolve) => {
+  const timeoutId = setTimeout(() => resolve(false), 100);
+  bridge.send("VKWebAppInit")
+    .then(() => {
+      clearTimeout(timeoutId);
+      resolve(true);
+    })
+    .catch(() => {
+      clearTimeout(timeoutId);
+      resolve(false);
+    });
+}),
+  mountAvailableViewport = () => new Promise((resolve) => {
     const timeoutId = setTimeout(() => resolve(false), 100);
-    bridge.send("VKWebAppInit")
+    mountViewport()
       .then(() => {
         clearTimeout(timeoutId);
         resolve(true);
@@ -95,8 +106,7 @@ const isVKMA = () => {
         clearTimeout(timeoutId);
         resolve(false);
       });
-  });
-},
+  }),
   { id } = defineProps(["id"]),
   pages = inject("pages"),
   { title, description } = pages[id],
@@ -111,15 +121,7 @@ const isVKMA = () => {
 
 if (tma) {
   init();
-  console.log(mountViewport.isAvailable());
-  if (mountViewport.isAvailable())
-    try {
-      const promise = mountViewport();
-      await promise;
-      console.log("Mount");
-    } catch (err) {
-      console.log(err);
-    }
+  if (mountViewport.isAvailable()) mountAvailableViewport();
 }
 
 let cardDate;
