@@ -85,40 +85,14 @@ import bridge from "@vkontakte/vk-bridge";
 
 const runTimeouted = (promise) => new Promise((resolve) => {
   const timeoutId = setTimeout(() => resolve(false), 100);
-  promise
-    .then(() => {
-      clearTimeout(timeoutId);
-      resolve(true);
-    })
-    .catch(() => {
-      clearTimeout(timeoutId);
-      resolve(false);
-    });
+  promise.then(() => {
+    clearTimeout(timeoutId);
+    resolve(true);
+  }).catch(() => {
+    clearTimeout(timeoutId);
+    resolve(false);
+  });
 }),
-/*  isVKMA = () => new Promise((resolve) => {
-    const timeoutId = setTimeout(() => resolve(false), 100);
-    bridge.send("VKWebAppInit")
-      .then(() => {
-        clearTimeout(timeoutId);
-        resolve(true);
-      })
-      .catch(() => {
-        clearTimeout(timeoutId);
-        resolve(false);
-      });
-  }),
-  mountAvailableViewport = () => new Promise((resolve) => {
-    const timeoutId = setTimeout(() => resolve(false), 100);
-    mountViewport()
-      .then(() => {
-        clearTimeout(timeoutId);
-        resolve(true);
-      })
-      .catch(() => {
-        clearTimeout(timeoutId);
-        resolve(false);
-      });
-  }),*/
   { id } = defineProps(["id"]),
   pages = inject("pages"),
   { title, description } = pages[id],
@@ -128,16 +102,12 @@ const runTimeouted = (promise) => new Promise((resolve) => {
   cardNumber = shallowRef(),
   card = shallowRef(false),
   now = new Date(),
-  [vkma, tma] = await Promise.all([
-  //isVKMA(), 
-  runTimeouted(bridge.send("VKWebAppInit")),
-  isTMA()]),
+  [vkma, tma] = await Promise.all([runTimeouted(bridge.send("VKWebAppInit")), isTMA()]),
   { hasFinishLoading, progress } = await useProgress();
 
 if (tma) {
   init();
   if (mountViewport.isAvailable()) await runTimeouted(mountViewport());
-  //mountAvailableViewport();
 }
 
 let cardDate;
