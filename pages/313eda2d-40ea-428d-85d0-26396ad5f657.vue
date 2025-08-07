@@ -20,7 +20,7 @@
     </EffectComposer>
   </TresCanvas>
   <div class="fixed inset-0 flex flex-col justify-between pb-12 pt-12"
-    :class="{ 'portrait:pt-20': tma }" un-cloak>
+    :class="{ 'portrait:pt-20': tma && isFullscreen() }" un-cloak>
     <Transition enter-active-class="animate__animated animate__fadeInDown animate__fast" enter-from-class="animate-none"
       enter-to-class="animate-none">
       <el-button v-show="show[2] && hasFinishLoading" tag="a" size="large" href="https://bryusova.ru" target="_blank"
@@ -75,7 +75,7 @@
 import { TresCanvas } from "@tresjs/core";
 import { EffectComposer, Glitch, SMAA } from '@tresjs/post-processing';
 import { reactive, provide, watch, shallowRef, inject } from "vue";
-import { cloudStorage, init, viewport } from "@telegram-apps/sdk";
+import { cloudStorage, init, isFullscreen, mountViewport } from "@telegram-apps/sdk";
 import { isTMA } from "@telegram-apps/bridge";
 import { ElButton, ElNotification, ElProgress, ElPopover } from "element-plus";
 import { useSpeechSynthesis } from "@vueuse/core";
@@ -111,7 +111,14 @@ const isVKMA = () => {
 
 if (tma) {
   init();
- // if (viewport.mount.isAvailable()) await viewport.mount();
+  if (mountViewport.isAvailable())
+    try {
+      const promise = mountViewport();
+      await promise;
+      console.log("Mount");
+    } catch (err) {
+      console.log(err);
+    }
 }
 
 let cardDate;
