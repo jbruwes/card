@@ -111,6 +111,7 @@ const isVKMA = () => {
 
 if (tma) {
   init();
+  console.log(mountViewport.isAvailable());
   if (mountViewport.isAvailable())
     try {
       const promise = mountViewport();
