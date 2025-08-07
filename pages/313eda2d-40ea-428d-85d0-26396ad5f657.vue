@@ -136,7 +136,7 @@ const runTimeouted = (promise) => new Promise((resolve) => {
 
 if (tma) {
   init();
-  if (mountViewport.isAvailable())  runTimeouted(mountViewport());
+  if (mountViewport.isAvailable()) await runTimeouted(mountViewport());
   //mountAvailableViewport();
 }
 
