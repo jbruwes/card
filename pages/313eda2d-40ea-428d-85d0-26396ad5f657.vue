@@ -167,7 +167,7 @@ watch(() => show[0], () => {
     localStorage.setItem("card-date", new Date().toISOString());
   }
 });
-
+__unocss_runtime.extract(["shadow-cyan-500/50"]);
 </script>
 
 <style>
