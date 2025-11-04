@@ -93,7 +93,7 @@ const runTimeouted = (promise) => new Promise((resolve) => {
     resolve(false);
   });
 }),
-  { pid: id } = defineProps(["pid"]),
+  { id } = defineProps(["id"]),
   pages = inject("pages"),
   { title, description } = pages[id],
   show = reactive(new Array(3).fill(false)),
